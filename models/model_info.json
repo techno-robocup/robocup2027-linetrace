@@ -1,0 +1,15 @@
+{
+  "model_input_w": 160,
+  "model_input_h": 90,
+  "channels": "bgr",
+  "crop_ratio": 0.6,
+  "motor_min": 1000,
+  "motor_max": 2000,
+  "target_space": "lr",
+  "use_sensors": false,
+  "sensor_dim": 0,
+  "rotate180_at_inference": true,
+  "final_val_loss": 0.00772048,
+  "final_val_mae_pwm": 97.7467,
+  "epochs_trained": 3
+}

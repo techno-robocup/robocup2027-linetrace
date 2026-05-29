@@ -1,0 +1,3 @@
+add_executable(push_session src/main.cpp)
+target_link_libraries(push_session PRIVATE transfer_client)
+target_compile_features(push_session PRIVATE cxx_std_17)

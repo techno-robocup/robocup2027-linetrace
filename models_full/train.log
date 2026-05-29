@@ -1,0 +1,48 @@
+device: CPU
+sessions: 10  samples: 19390
+train: 11811  val: 7579
+epoch 1/40  train 0.00798701  val 0.00713168  valMAE 0.0929467 (92.9467 pwm)  lr 0.001  20.3021s
+epoch 2/40  train 0.00695556  val 0.00571797  valMAE 0.0838863 (83.8863 pwm)  lr 0.001  20.8052s
+epoch 3/40  train 0.00599477  val 0.00559053  valMAE 0.0803781 (80.3781 pwm)  lr 0.001  21.5418s
+epoch 4/40  train 0.00576301  val 0.00511138  valMAE 0.0764879 (76.4879 pwm)  lr 0.001  20.5341s
+epoch 5/40  train 0.00566018  val 0.00501772  valMAE 0.0775598 (77.5598 pwm)  lr 0.001  20.4672s
+epoch 6/40  train 0.00554512  val 0.00521388  valMAE 0.0811728 (81.1728 pwm)  lr 0.001  20.5224s
+epoch 7/40  train 0.00539433  val 0.00507691  valMAE 0.0780939 (78.0939 pwm)  lr 0.001  20.7758s
+epoch 8/40  train 0.00535852  val 0.00493235  valMAE 0.07707 (77.07 pwm)  lr 0.001  20.5572s
+epoch 9/40  train 0.00535712  val 0.00487999  valMAE 0.0740391 (74.0391 pwm)  lr 0.001  20.4492s
+epoch 10/40  train 0.00529198  val 0.00485514  valMAE 0.0751972 (75.1972 pwm)  lr 0.001  20.5913s
+epoch 11/40  train 0.00525014  val 0.00497246  valMAE 0.0767305 (76.7305 pwm)  lr 0.001  20.5024s
+epoch 12/40  train 0.00526026  val 0.00490324  valMAE 0.0771474 (77.1474 pwm)  lr 0.001  20.6563s
+epoch 13/40  train 0.00525711  val 0.00501228  valMAE 0.076859 (76.859 pwm)  lr 0.001  21.0602s
+epoch 14/40  train 0.00521743  val 0.00492454  valMAE 0.0782425 (78.2425 pwm)  lr 0.001  21.6367s
+  -> lr reduced to 0.0005
+epoch 15/40  train 0.00507679  val 0.0047809  valMAE 0.0741638 (74.1638 pwm)  lr 0.0005  21.647s
+epoch 16/40  train 0.00510113  val 0.00477793  valMAE 0.0720203 (72.0203 pwm)  lr 0.0005  21.5407s
+epoch 17/40  train 0.00505958  val 0.00484007  valMAE 0.0744405 (74.4405 pwm)  lr 0.0005  21.554s
+epoch 18/40  train 0.0050256  val 0.00500771  valMAE 0.073989 (73.989 pwm)  lr 0.0005  21.5285s
+epoch 19/40  train 0.00505624  val 0.00473074  valMAE 0.0729568 (72.9568 pwm)  lr 0.0005  21.4841s
+epoch 20/40  train 0.00502555  val 0.00498871  valMAE 0.0769179 (76.9179 pwm)  lr 0.0005  21.5032s
+epoch 21/40  train 0.00500355  val 0.00475707  valMAE 0.0737136 (73.7136 pwm)  lr 0.0005  21.4652s
+epoch 22/40  train 0.005014  val 0.00474855  valMAE 0.0712313 (71.2313 pwm)  lr 0.0005  21.497s
+epoch 23/40  train 0.00499183  val 0.00466488  valMAE 0.0729441 (72.9441 pwm)  lr 0.0005  21.802s
+epoch 24/40  train 0.00497007  val 0.00465498  valMAE 0.0727681 (72.7681 pwm)  lr 0.0005  21.3459s
+epoch 25/40  train 0.00498557  val 0.00470911  valMAE 0.0722801 (72.2801 pwm)  lr 0.0005  21.2663s
+epoch 26/40  train 0.0049941  val 0.00466758  valMAE 0.0732808 (73.2808 pwm)  lr 0.0005  21.5457s
+epoch 27/40  train 0.00497469  val 0.004624  valMAE 0.0722649 (72.2649 pwm)  lr 0.0005  21.408s
+epoch 28/40  train 0.00495069  val 0.00473109  valMAE 0.073173 (73.173 pwm)  lr 0.0005  21.4084s
+epoch 29/40  train 0.00495899  val 0.00470157  valMAE 0.0734411 (73.4411 pwm)  lr 0.0005  21.387s
+epoch 30/40  train 0.00495105  val 0.00477015  valMAE 0.0738762 (73.8762 pwm)  lr 0.0005  21.3137s
+epoch 31/40  train 0.00492732  val 0.00482781  valMAE 0.0754157 (75.4157 pwm)  lr 0.0005  21.6127s
+  -> lr reduced to 0.00025
+epoch 32/40  train 0.00485667  val 0.00459532  valMAE 0.0711752 (71.1752 pwm)  lr 0.00025  22.1152s
+epoch 33/40  train 0.00484206  val 0.00457249  valMAE 0.0709767 (70.9767 pwm)  lr 0.00025  21.8932s
+epoch 34/40  train 0.00482404  val 0.00462815  valMAE 0.0706936 (70.6936 pwm)  lr 0.00025  21.3645s
+epoch 35/40  train 0.00483915  val 0.00467757  valMAE 0.0727307 (72.7307 pwm)  lr 0.00025  21.3999s
+epoch 36/40  train 0.00481896  val 0.00462494  valMAE 0.0719615 (71.9615 pwm)  lr 0.00025  21.31s
+epoch 37/40  train 0.00480403  val 0.0046042  valMAE 0.0713265 (71.3265 pwm)  lr 0.00025  21.5868s
+  -> lr reduced to 0.000125
+epoch 38/40  train 0.00475957  val 0.00459194  valMAE 0.0710331 (71.0331 pwm)  lr 0.000125  21.3562s
+epoch 39/40  train 0.00475875  val 0.00454255  valMAE 0.0705732 (70.5732 pwm)  lr 0.000125  21.4897s
+epoch 40/40  train 0.00471856  val 0.00454338  valMAE 0.0707519 (70.7519 pwm)  lr 0.000125  21.366s
+best val loss 0.00454255  (MAE 70.5732 pwm)
+saved to /home/rotarymars/projects/club/robocup2027-linetrace/models_full/linetrace_model.pt
