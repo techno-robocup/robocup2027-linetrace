@@ -1,0 +1,2 @@
+/usr/bin/ar qc libcommon_torch.a CMakeFiles/common_torch.dir/src/preprocess.cpp.o CMakeFiles/common_torch.dir/src/model.cpp.o
+/usr/bin/ranlib libcommon_torch.a

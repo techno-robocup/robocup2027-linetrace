@@ -3,6 +3,7 @@ add_executable(control_station
   src/gamepad_factory.cpp
   src/gamepad_scripted.cpp
   src/gamepad_sdl.cpp
+  src/input_mouse.cpp
 )
 target_include_directories(control_station PRIVATE
   ${CMAKE_CURRENT_SOURCE_DIR}/src ${OpenCV_INCLUDE_DIRS})

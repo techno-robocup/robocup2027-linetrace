@@ -5,9 +5,12 @@
 //     --robot <host>        robot IP/hostname (default 127.0.0.1)
 //     --ctrl-port <p>       robot control port (default 9101)
 //     --preview-port <p>    local preview listen port (default 9102)
-//     --input sdl|scripted  gamepad backend (default sdl; scripted for testing)
+//     --input sdl|mouse|scripted  input backend (default sdl; mouse = drag on
+//                           the preview window; scripted for testing)
 //     --gain <n>            max motor offset from stop (default 500)
 //     --no-display          don't open a preview window (headless)
+//     --view-only           just display the preview stream (e.g. from the
+//                           executor's --preview-to); no input, no control TX
 //     --run-seconds <n>     auto-exit (0 = forever)
 #include <netinet/in.h>
 
@@ -52,6 +55,7 @@ struct Args {
   std::string input = "sdl";
   float gain = 500.0f;
   bool display = true;
+  bool viewOnly = false;
   int runSeconds = 0;
 };
 
@@ -66,6 +70,7 @@ Args parseArgs(int argc, char** argv) {
     else if (s == "--input") a.input = nx(i);
     else if (s == "--gain") a.gain = std::stof(nx(i));
     else if (s == "--no-display") a.display = false;
+    else if (s == "--view-only") a.viewOnly = true;
     else if (s == "--run-seconds") a.runSeconds = std::stoi(nx(i));
     else { std::cerr << "unknown arg: " << s << "\n"; std::exit(2); }
   }
@@ -151,10 +156,17 @@ int main(int argc, char** argv) {
   }
   const int txFd = net::openUdpSend();
 
-  auto pad = makeGamepad(args.input);
-  if (!pad->open()) {
-    std::cerr << "gamepad open failed (try --input scripted)\n";
+  if ((args.input == "mouse" || args.viewOnly) && !args.display) {
+    std::cerr << "this mode needs the preview window (drop --no-display)\n";
     return 1;
+  }
+  std::unique_ptr<GamepadInput> pad;
+  if (!args.viewOnly) {
+    pad = makeGamepad(args.input);
+    if (!pad->open()) {
+      std::cerr << "gamepad open failed (try --input mouse or --input scripted)\n";
+      return 1;
+    }
   }
 
   PreviewReceiver preview(args.previewPort);
@@ -174,38 +186,58 @@ int main(int argc, char** argv) {
   while (g_run.load()) {
     const auto tick = std::chrono::steady_clock::now();
     GamepadState gs;
-    pad->poll(gs);
-    if (gs.quit) break;
+    MotorCmd cmd;  // stays neutral in view-only mode
+    if (!args.viewOnly) {
+      pad->poll(gs);
+      if (gs.quit) break;
 
-    MotorCmd cmd = mixArcade(gs.throttle, gs.steer, args.gain);
+      cmd = mixArcade(gs.throttle, gs.steer, args.gain);
 
-    ControlPacket c;
-    c.seq = seq++;
-    c.tsMs = nowMs();
-    c.left = static_cast<int16_t>(cmd.left);
-    c.right = static_cast<int16_t>(cmd.right);
-    c.axes[0] = static_cast<int16_t>(gs.steer * 32767);
-    c.axes[1] = static_cast<int16_t>(gs.throttle * 32767);
-    if (gs.recording) c.flagBits |= flags::kRecording;
-    if (gs.estop) c.flagBits |= flags::kEstop;
-    c.flagBits |= flags::kHeartbeat;
+      ControlPacket c;
+      c.seq = seq++;
+      c.tsMs = nowMs();
+      c.left = static_cast<int16_t>(cmd.left);
+      c.right = static_cast<int16_t>(cmd.right);
+      c.axes[0] = static_cast<int16_t>(gs.steer * 32767);
+      c.axes[1] = static_cast<int16_t>(gs.throttle * 32767);
+      if (gs.recording) c.flagBits |= flags::kRecording;
+      if (gs.estop) c.flagBits |= flags::kEstop;
+      c.flagBits |= flags::kHeartbeat;
 
-    uint8_t buf[kControlPacketSize];
-    encodeControl(c, buf);
-    net::sendTo(txFd, robot, buf, kControlPacketSize);
+      uint8_t buf[kControlPacketSize];
+      encodeControl(c, buf);
+      net::sendTo(txFd, robot, buf, kControlPacketSize);
+    }
 
 #ifdef HAVE_HIGHGUI
     if (args.display) {
       cv::Mat frame = preview.latest();
-      if (!frame.empty()) {
+      if (frame.empty()) {  // keep the window (and mouse input) alive
+        frame = cv::Mat(324, 576, CV_8UC3, cv::Scalar(30, 30, 30));
+        cv::putText(frame, "waiting for preview from " + args.robot, {8, 162},
+                    cv::FONT_HERSHEY_SIMPLEX, 0.5, {180, 180, 180}, 1);
+      }
+      if (!args.viewOnly) {  // view-only frames arrive already annotated
         cv::putText(frame, (gs.recording ? "REC" : "idle"), {8, 20},
                     cv::FONT_HERSHEY_SIMPLEX, 0.6,
                     gs.recording ? cv::Scalar(0, 0, 255) : cv::Scalar(180, 180, 180), 2);
         cv::putText(frame, "L" + std::to_string(cmd.left) + " R" + std::to_string(cmd.right),
                     {8, 44}, cv::FONT_HERSHEY_SIMPLEX, 0.5, {0, 220, 0}, 1);
-        cv::imshow("preview", frame);
-        if (cv::waitKey(1) == 'q') break;
+        if (gs.estop)
+          cv::putText(frame, "ESTOP", {8, 68}, cv::FONT_HERSHEY_SIMPLEX, 0.6,
+                      {0, 0, 255}, 2);
+        // Virtual-stick HUD: dot = current (steer, throttle).
+        const cv::Point hub{frame.cols - 48, frame.rows - 48};
+        cv::circle(frame, hub, 40, {120, 120, 120}, 1);
+        cv::circle(frame,
+                   hub + cv::Point(static_cast<int>(gs.steer * 36),
+                                   static_cast<int>(-gs.throttle * 36)),
+                   4, {0, 220, 0}, cv::FILLED);
       }
+      cv::imshow("preview", frame);
+      const int key = cv::waitKey(1);
+      if (key == 'q') break;
+      if (pad && key >= 0) pad->onKey(key);
     }
 #endif
 
@@ -216,13 +248,15 @@ int main(int argc, char** argv) {
   }
 
   // Best-effort neutral + estop on exit.
-  ControlPacket stop;
-  stop.seq = seq++;
-  stop.tsMs = nowMs();
-  stop.flagBits = flags::kEstop;
-  uint8_t buf[kControlPacketSize];
-  encodeControl(stop, buf);
-  net::sendTo(txFd, robot, buf, kControlPacketSize);
+  if (!args.viewOnly) {
+    ControlPacket stop;
+    stop.seq = seq++;
+    stop.tsMs = nowMs();
+    stop.flagBits = flags::kEstop;
+    uint8_t buf[kControlPacketSize];
+    encodeControl(stop, buf);
+    net::sendTo(txFd, robot, buf, kControlPacketSize);
+  }
 
   preview.stop();
   net::closeFd(txFd);

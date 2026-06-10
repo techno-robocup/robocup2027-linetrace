@@ -1,0 +1,2 @@
+/usr/bin/ar qc libtransfer_client.a CMakeFiles/transfer_client.dir/src/transfer_client.cpp.o CMakeFiles/transfer_client.dir/src/wire.cpp.o
+/usr/bin/ranlib libtransfer_client.a

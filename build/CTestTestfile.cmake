@@ -1,6 +1,6 @@
 # CMake generated Testfile for 
-# Source directory: /home/rotarymars/projects/club/robocup2027-linetrace
-# Build directory: /home/rotarymars/projects/club/robocup2027-linetrace/build
+# Source directory: /home/rotarymars/projects/club/2027/robocup2027-linetrace
+# Build directory: /home/rotarymars/projects/club/2027/robocup2027-linetrace/build
 # 
 # This file includes the relevant testing commands required for 
 # testing this directory and lists subdirectories to be tested as well.

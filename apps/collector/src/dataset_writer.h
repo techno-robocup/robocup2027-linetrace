@@ -34,7 +34,15 @@ class DatasetWriter {
 
   // Creates <root>/session_<stamp>/{linetrace, labels.csv, session.json}.
   bool startSession(const std::string& stamp, const std::string& meta);
-  std::string sessionDir() const { return sessionDir_; }
+
+  // Drains the queue and closes the current labels.csv; the next startSession
+  // begins a fresh session directory. Safe to call with no session open.
+  void endSession();
+
+  std::string sessionDir() const {
+    std::lock_guard<std::mutex> lk(mx_);
+    return sessionDir_;
+  }
 
   void start();
   void stop();  // flush + join
@@ -56,7 +64,8 @@ class DatasetWriter {
   FILE* csv_ = nullptr;
 
   std::deque<FrameJob> q_;
-  std::mutex mx_;
+  bool busy_ = false;      // a popped job is still being written
+  mutable std::mutex mx_;  // guards q_, busy_, csv_, sessionDir_, imageDir_
   std::condition_variable cv_;
   std::thread thread_;
   std::atomic<bool> run_{false};

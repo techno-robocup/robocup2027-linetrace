@@ -1,0 +1,19 @@
+{
+  "model_input_w": 160,
+  "model_input_h": 90,
+  "channels": "bgr",
+  "crop_ratio": 0.6,
+  "motor_min": 1000,
+  "motor_max": 2000,
+  "target_space": "lr",
+  "use_sensors": false,
+  "sensor_dim": 0,
+  "use_memory": true,
+  "seq_len": 8,
+  "memory_hidden": 64,
+  "preprocess_rotate180": false,
+  "frames_pre_rotated_by_source": true,
+  "final_val_loss": 0.0080687,
+  "final_val_mae_pwm": 113.414,
+  "epochs_trained": 2
+}

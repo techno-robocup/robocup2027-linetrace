@@ -1,4 +1,4 @@
-# Install script for directory: /home/rotarymars/projects/club/robocup2027-linetrace/tests
+# Install script for directory: /home/rotarymars/projects/club/2027/robocup2027-linetrace/tests
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)

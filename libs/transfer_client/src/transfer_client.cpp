@@ -135,17 +135,32 @@ Result TransferClient::listFiles(const std::string& pattern, std::vector<std::st
   return ok();
 }
 
-Result TransferClient::uploadDir(const fs::path& localDir, const std::string& remotePrefix) {
+Result TransferClient::uploadDir(const fs::path& localDir, const std::string& remotePrefix,
+                                 const Progress& progress) {
   std::error_code ec;
   if (!fs::is_directory(localDir, ec)) return err("not a directory: " + localDir.string());
+
+  // Pre-scan so progress can report totals.
+  std::vector<std::pair<fs::path, uint64_t>> files;
+  uint64_t bytesTotal = 0;
   for (const auto& entry : fs::recursive_directory_iterator(localDir, ec)) {
     if (!entry.is_regular_file()) continue;
-    const fs::path rel = fs::relative(entry.path(), localDir, ec);
-    if (ec) return err("relative path failed");
-    const std::string remote = remotePrefix + "/" + rel.generic_string();
-    Result r = uploadFile(entry.path(), remote);
-    if (!r.ok) return r;
+    const uint64_t size = static_cast<uint64_t>(fs::file_size(entry.path(), ec));
+    if (ec) return err("local file_size failed: " + entry.path().string());
+    files.emplace_back(entry.path(), size);
+    bytesTotal += size;
   }
+
+  uint64_t bytesDone = 0;
+  for (size_t i = 0; i < files.size(); ++i) {
+    const fs::path rel = fs::relative(files[i].first, localDir, ec);
+    if (ec) return err("relative path failed");
+    if (progress) progress(i, files.size(), bytesDone, bytesTotal, rel.generic_string());
+    Result r = uploadFile(files[i].first, remotePrefix + "/" + rel.generic_string());
+    if (!r.ok) return r;
+    bytesDone += files[i].second;
+  }
+  if (progress) progress(files.size(), files.size(), bytesDone, bytesTotal, "");
   return ok();
 }
 

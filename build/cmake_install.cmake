@@ -1,4 +1,4 @@
-# Install script for directory: /home/rotarymars/projects/club/robocup2027-linetrace
+# Install script for directory: /home/rotarymars/projects/club/2027/robocup2027-linetrace
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -44,62 +44,62 @@ endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/rotarymars/projects/club/robocup2027-linetrace/build/libs/common/cmake_install.cmake")
+  include("/home/rotarymars/projects/club/2027/robocup2027-linetrace/build/libs/common/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/rotarymars/projects/club/robocup2027-linetrace/build/libs/common_torch/cmake_install.cmake")
+  include("/home/rotarymars/projects/club/2027/robocup2027-linetrace/build/libs/common_torch/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/rotarymars/projects/club/robocup2027-linetrace/build/libs/transfer_client/cmake_install.cmake")
+  include("/home/rotarymars/projects/club/2027/robocup2027-linetrace/build/libs/transfer_client/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/rotarymars/projects/club/robocup2027-linetrace/build/libs/esp32_driver/cmake_install.cmake")
+  include("/home/rotarymars/projects/club/2027/robocup2027-linetrace/build/libs/esp32_driver/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/rotarymars/projects/club/robocup2027-linetrace/build/libs/netutil/cmake_install.cmake")
+  include("/home/rotarymars/projects/club/2027/robocup2027-linetrace/build/libs/netutil/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/rotarymars/projects/club/robocup2027-linetrace/build/libs/camera/cmake_install.cmake")
+  include("/home/rotarymars/projects/club/2027/robocup2027-linetrace/build/libs/camera/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/rotarymars/projects/club/robocup2027-linetrace/build/apps/trainer/cmake_install.cmake")
+  include("/home/rotarymars/projects/club/2027/robocup2027-linetrace/build/apps/trainer/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/rotarymars/projects/club/robocup2027-linetrace/build/apps/push_session/cmake_install.cmake")
+  include("/home/rotarymars/projects/club/2027/robocup2027-linetrace/build/apps/push_session/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/rotarymars/projects/club/robocup2027-linetrace/build/apps/control_station/cmake_install.cmake")
+  include("/home/rotarymars/projects/club/2027/robocup2027-linetrace/build/apps/control_station/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/rotarymars/projects/club/robocup2027-linetrace/build/apps/collector/cmake_install.cmake")
+  include("/home/rotarymars/projects/club/2027/robocup2027-linetrace/build/apps/collector/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/rotarymars/projects/club/robocup2027-linetrace/build/apps/executor/cmake_install.cmake")
+  include("/home/rotarymars/projects/club/2027/robocup2027-linetrace/build/apps/executor/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/rotarymars/projects/club/robocup2027-linetrace/build/tests/cmake_install.cmake")
+  include("/home/rotarymars/projects/club/2027/robocup2027-linetrace/build/tests/cmake_install.cmake")
 endif()
 
 if(CMAKE_INSTALL_COMPONENT)
@@ -110,5 +110,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "/home/rotarymars/projects/club/robocup2027-linetrace/build/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "/home/rotarymars/projects/club/2027/robocup2027-linetrace/build/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")

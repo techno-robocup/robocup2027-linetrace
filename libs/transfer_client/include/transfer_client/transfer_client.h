@@ -3,7 +3,9 @@
 // to bulk-ship recorded sessions to the training PC.
 #pragma once
 
+#include <cstdint>
 #include <filesystem>
+#include <functional>
 #include <string>
 #include <vector>
 
@@ -30,9 +32,16 @@ class TransferClient {
   // Lists server-side paths matching a glob pattern (relative to server root).
   Result listFiles(const std::string& pattern, std::vector<std::string>& out);
 
+  // Upload progress: called before each file (and once more at the end with
+  // filesDone == filesTotal). bytesDone counts completed files only.
+  using Progress = std::function<void(size_t filesDone, size_t filesTotal,
+                                      uint64_t bytesDone, uint64_t bytesTotal,
+                                      const std::string& currentRel)>;
+
   // Recursively uploads every regular file under localDir, preserving the tree
   // beneath remotePrefix. Returns the first failure (if any).
-  Result uploadDir(const std::filesystem::path& localDir, const std::string& remotePrefix);
+  Result uploadDir(const std::filesystem::path& localDir, const std::string& remotePrefix,
+                   const Progress& progress = nullptr);
 
   const std::string& host() const { return host_; }
   int port() const { return port_; }

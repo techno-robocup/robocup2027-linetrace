@@ -1,4 +1,4 @@
-# Install script for directory: /home/rotarymars/projects/club/robocup2027-linetrace/libs/transfer_client
+# Install script for directory: /home/rotarymars/projects/club/2027/robocup2027-linetrace/libs/transfer_client
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)

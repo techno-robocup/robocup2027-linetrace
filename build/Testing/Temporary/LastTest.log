@@ -1,10 +1,10 @@
-Start testing: May 29 19:35 JST
+Start testing: Jun 10 17:38 JST
 ----------------------------------------------------------
 1/2 Testing: common_test
 1/2 Test: common_test
-Command: "/home/rotarymars/projects/club/robocup2027-linetrace/build/tests/common_test"
-Directory: /home/rotarymars/projects/club/robocup2027-linetrace/build/tests
-"common_test" start time: May 29 19:35 JST
+Command: "/home/rotarymars/projects/club/2027/robocup2027-linetrace/build/tests/common_test"
+Directory: /home/rotarymars/projects/club/2027/robocup2027-linetrace/build/tests
+"common_test" start time: Jun 10 17:38 JST
 Output:
 ----------------------------------------------------------
 common_test: ALL PASSED
@@ -12,25 +12,25 @@ common_test: ALL PASSED
 Test time =   0.25 sec
 ----------------------------------------------------------
 Test Passed.
-"common_test" end time: May 29 19:35 JST
+"common_test" end time: Jun 10 17:38 JST
 "common_test" time elapsed: 00:00:00
 ----------------------------------------------------------
 
 2/2 Testing: esp32_driver_test
 2/2 Test: esp32_driver_test
-Command: "/home/rotarymars/projects/club/robocup2027-linetrace/build/tests/esp32_driver_test"
-Directory: /home/rotarymars/projects/club/robocup2027-linetrace/build/tests
-"esp32_driver_test" start time: May 29 19:35 JST
+Command: "/home/rotarymars/projects/club/2027/robocup2027-linetrace/build/tests/esp32_driver_test"
+Directory: /home/rotarymars/projects/club/2027/robocup2027-linetrace/build/tests
+"esp32_driver_test" start time: Jun 10 17:38 JST
 Output:
 ----------------------------------------------------------
-esp32: connected on /dev/pts/21
+esp32: connected on /dev/pts/14
 esp32_driver_test: ALL PASSED
 <end of output>
 Test time =   0.15 sec
 ----------------------------------------------------------
 Test Passed.
-"esp32_driver_test" end time: May 29 19:36 JST
+"esp32_driver_test" end time: Jun 10 17:38 JST
 "esp32_driver_test" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-End testing: May 29 19:36 JST
+End testing: Jun 10 17:38 JST

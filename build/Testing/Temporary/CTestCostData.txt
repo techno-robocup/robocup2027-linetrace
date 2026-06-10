@@ -1,3 +1,3 @@
-common_test 1 0.25272
-esp32_driver_test 1 0.154905
+common_test 2 0.125231
+esp32_driver_test 1 0.154972
 ---

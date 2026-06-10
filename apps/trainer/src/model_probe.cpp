@@ -19,17 +19,18 @@ using namespace rc;
 int main(int argc, char** argv) {
   if (argc < 3) {
     std::cerr << "usage: model_probe <model.pt> <image.jpg> "
-                 "[--grayscale] [--sensors] [--rotate] [--ts]\n";
+                 "[--grayscale] [--sensors] [--memory] [--rotate] [--ts]\n";
     return 2;
   }
   const std::string modelPath = argv[1];
   const std::string imagePath = argv[2];
-  bool grayscale = false, sensors = false, rotate = false;
+  bool grayscale = false, sensors = false, memory = false, rotate = false;
   TargetSpace space = TargetSpace::LR;
   for (int i = 3; i < argc; ++i) {
     std::string s = argv[i];
     if (s == "--grayscale") grayscale = true;
     else if (s == "--sensors") sensors = true;
+    else if (s == "--memory") memory = true;
     else if (s == "--rotate") rotate = true;
     else if (s == "--ts") space = TargetSpace::ThrottleSteer;
   }
@@ -37,6 +38,7 @@ int main(int argc, char** argv) {
   LineNetOptions opt;
   opt.inChannels = grayscale ? 1 : 3;
   opt.sensorDim = sensors ? kSensorDim : 0;
+  opt.useMemory = memory;  // single-frame probe runs one step from zero state
   LineNet net(opt);
   try {
     torch::load(net, modelPath);

@@ -21,6 +21,7 @@ struct Sample {
   MotorCmd cmd;
   std::array<float, kSensorDim> sensors{};
   int sessionId = 0;
+  double ts = 0.0;  // labels.csv timestamp (seconds); 0 if absent
 };
 
 struct DatasetConfig {
@@ -28,6 +29,7 @@ struct DatasetConfig {
   TargetSpace targetSpace = TargetSpace::LR;
   bool augment = false;     // enable on the training split only
   bool useSensors = false;  // include the sensor vector in each Example's target tail
+  int seqLen = 1;           // >1: temporal clips ending at each sample (memory training)
   uint64_t seed = 1234;
 };
 
@@ -40,18 +42,25 @@ std::vector<Sample> scanSessions(const std::vector<std::string>& sessionDirs,
 // Finds session_* subdirectories under a dataset root.
 std::vector<std::string> findSessionDirs(const std::string& root);
 
+// With cfg.seqLen == 1, one example per sample: image {C,H,W} -> label {2}.
+// With cfg.seqLen > 1, one example per *valid clip end*: a clip of seqLen
+// consecutive frames (same session, no recording gap) {T,C,H,W} -> the last
+// frame's label. Augmentation decisions are made once per clip.
 class LineDataset : public torch::data::Dataset<LineDataset> {
  public:
   LineDataset(std::vector<Sample> samples, DatasetConfig cfg);
 
   torch::data::Example<> get(size_t index) override;
-  torch::optional<size_t> size() const override { return samples_.size(); }
+  torch::optional<size_t> size() const override {
+    return cfg_.seqLen > 1 ? clipEnds_.size() : samples_.size();
+  }
 
   const DatasetConfig& config() const { return cfg_; }
   const std::vector<Sample>& samples() const { return samples_; }
 
  private:
   std::vector<Sample> samples_;
+  std::vector<size_t> clipEnds_;  // indices of samples that end a valid clip
   DatasetConfig cfg_;
 };
 

@@ -1,0 +1,1 @@
+/usr/bin/c++ -O3 -DNDEBUG CMakeFiles/transfer_client_test.dir/transfer_client_test.cpp.o -o transfer_client_test  ../libs/transfer_client/libtransfer_client.a 

@@ -29,4 +29,17 @@ void maybeFlip(cv::Mat& bgr, MotorCmd& cmd) {
   }
 }
 
+void augmentClipBrightness(std::vector<cv::Mat>& frames) {
+  std::uniform_real_distribution<float> dist(0.6f, 1.4f);
+  const float k = dist(rng());
+  for (auto& f : frames) f.convertTo(f, -1, k, 0.0);
+}
+
+void maybeFlipClip(std::vector<cv::Mat>& frames, MotorCmd& cmd) {
+  std::bernoulli_distribution coin(0.5);
+  if (!coin(rng())) return;
+  for (auto& f : frames) cv::flip(f, f, /*flipCode=*/1);
+  std::swap(cmd.left, cmd.right);
+}
+
 }  // namespace rc

@@ -1,4 +1,4 @@
-# Install script for directory: /home/rotarymars/projects/club/robocup2027-linetrace/libs/common_torch
+# Install script for directory: /home/rotarymars/projects/club/2027/robocup2027-linetrace/libs/common_torch
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)

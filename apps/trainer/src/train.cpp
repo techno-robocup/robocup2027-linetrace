@@ -40,6 +40,8 @@ struct Args {
   int limit = 0;          // 0 = use all; >0 caps train samples (smoke runs)
   bool grayscale = false;
   bool sensors = false;
+  bool memory = false;
+  int seqLen = 8;
   bool keepStopped = false;
   TargetSpace space = TargetSpace::LR;
   int patienceLR = 4;
@@ -62,6 +64,8 @@ Args parseArgs(int argc, char** argv) {
     else if (s == "--limit") a.limit = std::stoi(next(i));
     else if (s == "--grayscale") a.grayscale = true;
     else if (s == "--sensors") a.sensors = true;
+    else if (s == "--memory") a.memory = true;
+    else if (s == "--seq-len") a.seqLen = std::stoi(next(i));
     else if (s == "--keep-stopped") a.keepStopped = true;
     else if (s == "--target-space") a.space = (next(i) == "ts") ? TargetSpace::ThrottleSteer
                                                                 : TargetSpace::LR;
@@ -112,6 +116,9 @@ void writeModelInfo(const Args& a, int sensorDim, double valLoss, double valMaeP
     << "\",\n"
     << "  \"use_sensors\": " << (a.sensors ? "true" : "false") << ",\n"
     << "  \"sensor_dim\": " << sensorDim << ",\n"
+    << "  \"use_memory\": " << (a.memory ? "true" : "false") << ",\n"
+    << "  \"seq_len\": " << (a.memory ? a.seqLen : 1) << ",\n"
+    << "  \"memory_hidden\": " << LineNetOptions{}.memoryHidden << ",\n"
     // Frames are oriented by the capture source (collector/executor FrameSource
     // applies rotate180), so preprocessing itself never rotates. Training data
     // must already be in that same orientation.
@@ -127,6 +134,14 @@ void writeModelInfo(const Args& a, int sensorDim, double valLoss, double valMaeP
 
 int main(int argc, char** argv) {
   Args a = parseArgs(argc, argv);
+  if (a.memory && a.sensors) {
+    std::cerr << "--memory + --sensors is not implemented yet\n";
+    return 2;
+  }
+  if (a.memory && a.seqLen < 2) {
+    std::cerr << "--seq-len must be >= 2 with --memory\n";
+    return 2;
+  }
   torch::manual_seed(a.seed);
   std::filesystem::create_directories(a.out);
 
@@ -146,12 +161,18 @@ int main(int argc, char** argv) {
   splitBySession(all, a.valFrac, trainS, valS);
 
   if (a.limit > 0) {
-    std::mt19937 g(a.seed);
-    std::shuffle(trainS.begin(), trainS.end(), g);
-    if (static_cast<int>(trainS.size()) > a.limit) trainS.resize(a.limit);
     const int vlim = std::max(64, a.limit / 5);
-    std::shuffle(valS.begin(), valS.end(), g);
-    if (static_cast<int>(valS.size()) > vlim) valS.resize(vlim);
+    if (a.memory) {
+      // Clips need chronological order: truncate instead of shuffling.
+      if (static_cast<int>(trainS.size()) > a.limit) trainS.resize(a.limit);
+      if (static_cast<int>(valS.size()) > vlim) valS.resize(vlim);
+    } else {
+      std::mt19937 g(a.seed);
+      std::shuffle(trainS.begin(), trainS.end(), g);
+      if (static_cast<int>(trainS.size()) > a.limit) trainS.resize(a.limit);
+      std::shuffle(valS.begin(), valS.end(), g);
+      if (static_cast<int>(valS.size()) > vlim) valS.resize(vlim);
+    }
   }
   std::cout << "train: " << trainS.size() << "  val: " << valS.size() << "\n";
   if (trainS.empty() || valS.empty()) {
@@ -165,22 +186,34 @@ int main(int argc, char** argv) {
   dcfg.preproc.rotate180 = false;  // recorded frames already oriented
   dcfg.targetSpace = a.space;
   dcfg.useSensors = a.sensors;
+  dcfg.seqLen = a.memory ? a.seqLen : 1;
   dcfg.seed = a.seed;
 
   DatasetConfig trainCfg = dcfg;
   trainCfg.augment = true;
 
+  LineDataset trainDs(trainS, trainCfg), valDs(valS, dcfg);
+  if (a.memory)
+    std::cout << "memory clips (seq_len " << a.seqLen << "): train "
+              << trainDs.size().value() << "  val " << valDs.size().value() << "\n";
+  if (trainDs.size().value() == 0 || valDs.size().value() == 0) {
+    std::cerr << "no usable training/validation examples\n";
+    return 1;
+  }
+
   auto trainLoader = torch::data::make_data_loader<torch::data::samplers::RandomSampler>(
-      LineDataset(trainS, trainCfg).map(torch::data::transforms::Stack<>()),
+      std::move(trainDs).map(torch::data::transforms::Stack<>()),
       torch::data::DataLoaderOptions().batch_size(a.batch).workers(a.workers));
   auto valLoader = torch::data::make_data_loader<torch::data::samplers::SequentialSampler>(
-      LineDataset(valS, dcfg).map(torch::data::transforms::Stack<>()),
+      std::move(valDs).map(torch::data::transforms::Stack<>()),
       torch::data::DataLoaderOptions().batch_size(a.batch).workers(a.workers));
 
   // --- model + optimizer ---
   LineNetOptions opt;
   opt.inChannels = a.grayscale ? 1 : 3;
   opt.sensorDim = sensorDim;
+  opt.useMemory = a.memory;
+  opt.seqLen = a.memory ? a.seqLen : 1;
   LineNet net(opt);
   net->to(device);
 
@@ -208,7 +241,9 @@ int main(int argc, char** argv) {
       auto label = batch.target.narrow(1, 0, 2).to(device);
       optim.zero_grad();
       torch::Tensor pred;
-      if (a.sensors) {
+      if (a.memory) {
+        pred = net->forwardSeq(data);  // data: {N,T,C,H,W}
+      } else if (a.sensors) {
         auto sensors = batch.target.narrow(1, 2, kSensorDim).to(device);
         pred = net->forward(data, sensors);
       } else {
@@ -231,7 +266,9 @@ int main(int argc, char** argv) {
         auto data = batch.data.to(device);
         auto label = batch.target.narrow(1, 0, 2).to(device);
         torch::Tensor pred;
-        if (a.sensors) {
+        if (a.memory) {
+          pred = net->forwardSeq(data);
+        } else if (a.sensors) {
           auto sensors = batch.target.narrow(1, 2, kSensorDim).to(device);
           pred = net->forward(data, sensors);
         } else {

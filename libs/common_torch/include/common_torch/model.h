@@ -8,9 +8,10 @@
 // (throttle,steer)). An optional sensor-fusion branch concatenates an IMU /
 // ultrasonic feature vector before the fully-connected stack.
 //
-// Temporal memory (seq_len > 1, GRU over per-frame features) is declared in the
-// options for forward-compatibility but not yet implemented; single-frame is
-// the pipeline bring-up baseline.
+// Temporal memory (useMemory): a GRU over per-frame embeddings sits between
+// fc1 and fc2. The trainer feeds fixed-length clips via forwardSeq(); the
+// executor streams frame-by-frame via forwardStep(), carrying the hidden state
+// across frames. Sensors + memory combined is not implemented yet.
 #pragma once
 
 #include <torch/torch.h>
@@ -25,9 +26,10 @@ struct LineNetOptions {
   int inputW = kModelW;
   int sensorDim = 0;       // 0 => no sensor fusion
   float dropout = 0.3f;
-  // Temporal memory (not yet implemented):
+  // Temporal memory:
   bool useMemory = false;
-  int seqLen = 1;
+  int seqLen = 1;          // training clip length (inference streams statefully)
+  int memoryHidden = 64;   // GRU hidden size
 };
 
 class LineNetImpl : public torch::nn::Module {
@@ -35,15 +37,26 @@ class LineNetImpl : public torch::nn::Module {
   explicit LineNetImpl(const LineNetOptions& opt = {});
 
   // Single-frame forward. x: {N, C, H, W}. Returns {N, 2} in [0,1].
+  // For memory models this runs one step from a zero hidden state.
   torch::Tensor forward(torch::Tensor x);
 
   // Sensor-fusion forward. sensors: {N, sensorDim}.
   torch::Tensor forward(torch::Tensor x, torch::Tensor sensors);
 
+  // Memory training forward. x: {N, T, C, H, W}; predicts from the last step.
+  torch::Tensor forwardSeq(torch::Tensor x);
+
+  // Memory streaming forward. x: {N, C, H, W}; h: {1, N, memoryHidden} carried
+  // between calls (pass an undefined tensor to start from zero; updated in
+  // place with the new state).
+  torch::Tensor forwardStep(torch::Tensor x, torch::Tensor& h);
+
   const LineNetOptions& options() const { return opt_; }
 
  private:
   torch::Tensor convFeatures(torch::Tensor x);  // conv stack -> flat {N, flatDim}
+  torch::Tensor frameEmbed(torch::Tensor x);    // conv -> dropout -> fc1 -> relu {N, 100}
+  torch::Tensor headFrom(torch::Tensor f);      // fc2 -> fc3 -> head -> sigmoid {N, 2}
 
   LineNetOptions opt_;
   int flatDim_ = 0;
@@ -51,6 +64,7 @@ class LineNetImpl : public torch::nn::Module {
   torch::nn::Conv2d conv1_{nullptr}, conv2_{nullptr}, conv3_{nullptr}, conv4_{nullptr},
       conv5_{nullptr};
   torch::nn::Dropout drop_{nullptr};
+  torch::nn::GRU gru_{nullptr};  // only registered when opt_.useMemory
   torch::nn::Linear fc1_{nullptr}, fc2_{nullptr}, fc3_{nullptr}, head_{nullptr};
 };
 

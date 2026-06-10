@@ -69,12 +69,19 @@ Run anything Torch-linked with `LD_LIBRARY_PATH=../yolo_cpp/libtorch/lib`.
    - Robot: `collector --camera libcamera --dataset-root collected`
      (desktop test: `--camera synthetic --no-esp`).
    - Laptop: `control_station --robot <pi-ip>` (drive with the gamepad; **A** =
-     record toggle, **B**/bumpers = e-stop).
+     record toggle, **B**/bumpers = e-stop). No gamepad? `--input mouse`: hold
+     the left button on the preview window and drag (a continuous virtual
+     stick — up/down = throttle, left/right = steer, release = stop; keys:
+     `r` = record toggle, space = e-stop toggle, `q` = quit).
 3. **Ship data** (robot → PC):
    - PC: `transfer_node server 9000 datasets`
    - Robot: `push_session <pc-ip> 9000 collected/session_XXXX`
    - Retrain on the combined data.
 4. **Run autonomously** (robot): `executor --model linetrace_model.pt --camera libcamera`.
+   - Live view of the model's predictions: add `--preview-to <pc-ip>` and run
+     `control_station --view-only` on the PC — streams the camera frames with
+     the predicted L/R and a steering bar burned in (15 fps preview; safe to
+     combine with `--no-esp` for a motors-off dry run).
 
 ## ESP32 firmware
 

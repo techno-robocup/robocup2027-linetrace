@@ -57,7 +57,7 @@ endif()
 # esp32_driver is POSIX-only and lightweight; always build it (and uart_probe)
 # so it can be compile-checked off-robot.
 add_subdirectory(libs/esp32_driver)
-if(BUILD_COLLECTOR OR BUILD_CONTROL_STATION)
+if(BUILD_COLLECTOR OR BUILD_CONTROL_STATION OR BUILD_EXECUTOR)
   add_subdirectory(libs/netutil)
 endif()
 if(BUILD_COLLECTOR OR BUILD_EXECUTOR)

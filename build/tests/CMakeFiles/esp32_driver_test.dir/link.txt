@@ -1,0 +1,1 @@
+/usr/bin/c++ -O3 -DNDEBUG CMakeFiles/esp32_driver_test.dir/esp32_driver_test.cpp.o -o esp32_driver_test  ../libs/esp32_driver/libesp32_driver.a -lutil 

@@ -81,7 +81,7 @@ std::vector<Sample> scanSessions(const std::vector<std::string>& sessionDirs,
       return it == col.end() ? -1 : it->second;
     };
     const int cLeft = idx("motor_left"), cRight = idx("motor_right"),
-              cFile = idx("linetrace_file");
+              cFile = idx("linetrace_file"), cTs = idx("timestamp");
     if (cLeft < 0 || cRight < 0 || cFile < 0) {
       std::cerr << "warn: missing required columns in " << csvPath << "\n";
       ++sessionId;
@@ -112,6 +112,12 @@ std::vector<Sample> scanSessions(const std::vector<std::string>& sessionDirs,
                    sens(cAz),   sens(cUl),   sens(cUm),     sens(cUr)};
       s.imagePath = (fs::path(dir) / "linetrace" / file).string();
       s.sessionId = sessionId;
+      if (cTs >= 0 && cTs < static_cast<int>(v.size()) && !v[cTs].empty()) {
+        try {
+          s.ts = std::stod(v[cTs]);  // double: epoch seconds exceed float precision
+        } catch (...) {
+        }
+      }
       out.push_back(std::move(s));
     }
     ++sessionId;
@@ -120,15 +126,58 @@ std::vector<Sample> scanSessions(const std::vector<std::string>& sessionDirs,
 }
 
 LineDataset::LineDataset(std::vector<Sample> samples, DatasetConfig cfg)
-    : samples_(std::move(samples)), cfg_(cfg) {}
+    : samples_(std::move(samples)), cfg_(cfg) {
+  if (cfg_.seqLen > 1) {
+    // A clip ending at i is valid if the previous seqLen-1 samples are from the
+    // same session with no recording gap (skipStopped and REC pauses create
+    // jumps; 1s at the 10 Hz record rate tolerates a few dropped frames).
+    constexpr double kMaxGapSec = 1.0;
+    for (size_t i = cfg_.seqLen - 1; i < samples_.size(); ++i) {
+      bool ok = true;
+      for (size_t j = i - cfg_.seqLen + 2; j <= i && ok; ++j) {
+        ok = samples_[j].sessionId == samples_[j - 1].sessionId &&
+             (samples_[j].ts <= 0 || samples_[j - 1].ts <= 0 ||
+              (samples_[j].ts - samples_[j - 1].ts) < kMaxGapSec);
+      }
+      if (ok) clipEnds_.push_back(i);
+    }
+  }
+}
+
+namespace {
+cv::Mat readFrameOr(const std::string& path, int h, int w) {
+  cv::Mat img = cv::imread(path, cv::IMREAD_COLOR);
+  // Missing/corrupt frame: feed a black image so the batch shape is preserved.
+  if (img.empty()) img = cv::Mat::zeros(h, w, CV_8UC3);
+  return img;
+}
+}  // namespace
 
 torch::data::Example<> LineDataset::get(size_t index) {
-  const Sample& s = samples_[index];
-  cv::Mat img = cv::imread(s.imagePath, cv::IMREAD_COLOR);
-  if (img.empty()) {
-    // Missing/corrupt frame: feed a black image so the batch shape is preserved.
-    img = cv::Mat::zeros(cfg_.preproc.h, cfg_.preproc.w, CV_8UC3);
+  if (cfg_.seqLen > 1) {
+    const size_t end = clipEnds_[index];
+    std::vector<cv::Mat> frames;
+    frames.reserve(cfg_.seqLen);
+    for (size_t i = end - cfg_.seqLen + 1; i <= end; ++i)
+      frames.push_back(readFrameOr(samples_[i].imagePath, cfg_.preproc.h, cfg_.preproc.w));
+
+    MotorCmd cmd = samples_[end].cmd;
+    if (cfg_.augment) {
+      augmentClipBrightness(frames);
+      maybeFlipClip(frames, cmd);
+    }
+
+    std::vector<torch::Tensor> ts;
+    ts.reserve(frames.size());
+    for (auto& f : frames) ts.push_back(preprocess(f, cfg_.preproc, /*addBatch=*/false));
+    torch::Tensor data = torch::stack(ts);  // {T,C,H,W}
+
+    const auto y = encode(cmd, cfg_.targetSpace);
+    return {data, torch::tensor({y[0], y[1]}, torch::kFloat32)};
   }
+
+  const Sample& s = samples_[index];
+  cv::Mat img = readFrameOr(s.imagePath, cfg_.preproc.h, cfg_.preproc.w);
 
   MotorCmd cmd = s.cmd;
   if (cfg_.augment) {
