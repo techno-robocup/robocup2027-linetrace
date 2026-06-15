@@ -1,1 +1,0 @@
-/usr/bin/c++ -O3 -DNDEBUG CMakeFiles/push_session.dir/src/main.cpp.o -o push_session  ../../libs/transfer_client/libtransfer_client.a 

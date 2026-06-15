@@ -1,2 +1,0 @@
-/usr/bin/ar qc libesp32_driver.a CMakeFiles/esp32_driver.dir/src/esp32_driver.cpp.o CMakeFiles/esp32_driver.dir/src/serial_port.cpp.o CMakeFiles/esp32_driver.dir/src/port_scan.cpp.o CMakeFiles/esp32_driver.dir/src/protocol.cpp.o
-/usr/bin/ranlib libesp32_driver.a

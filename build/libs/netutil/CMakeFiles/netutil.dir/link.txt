@@ -1,2 +1,0 @@
-/usr/bin/ar qc libnetutil.a CMakeFiles/netutil.dir/src/net.cpp.o
-/usr/bin/ranlib libnetutil.a

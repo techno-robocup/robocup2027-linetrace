@@ -1,1 +1,0 @@
-/usr/bin/c++ -O3 -DNDEBUG CMakeFiles/uart_probe.dir/tools/uart_probe.cpp.o -o uart_probe  libesp32_driver.a 
