@@ -35,7 +35,7 @@ struct DatasetConfig {
 
 // Scans session directories, parses each labels.csv (header-driven, tolerant of
 // extra/missing columns), and returns the flat sample list. Rows with an empty
-// linetrace_file are skipped. If skipStopped, drops 1500/1500 frames.
+// linetrace_file are skipped. If skipStopped, drops neutral (0/0) frames.
 std::vector<Sample> scanSessions(const std::vector<std::string>& sessionDirs,
                                  bool skipStopped);
 

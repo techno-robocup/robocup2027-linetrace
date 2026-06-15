@@ -7,7 +7,7 @@
 //     --preview-port <p>    local preview listen port (default 9102)
 //     --input sdl|mouse|scripted  input backend (default sdl; mouse = drag on
 //                           the preview window; scripted for testing)
-//     --gain <n>            max motor offset from stop (default 500)
+//     --gain <n>            max motor offset from stop (default 8000 = full span)
 //     --no-display          don't open a preview window (headless)
 //     --view-only           just display the preview stream (e.g. from the
 //                           executor's --preview-to); no input, no control TX
@@ -53,7 +53,7 @@ struct Args {
   int ctrlPort = 9101;
   int previewPort = 9102;
   std::string input = "sdl";
-  float gain = 500.0f;
+  float gain = static_cast<float>(kMotorSpan);
   bool display = true;
   bool viewOnly = false;
   int runSeconds = 0;

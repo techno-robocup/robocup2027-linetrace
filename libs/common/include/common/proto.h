@@ -12,6 +12,8 @@
 #include <cstdint>
 #include <cstring>
 
+#include "common/config.h"
+
 namespace rc {
 
 // ---- control packet (station -> robot) ----
@@ -28,8 +30,8 @@ inline constexpr uint16_t kHeartbeat = 1 << 2;
 struct ControlPacket {
   uint32_t seq = 0;
   uint64_t tsMs = 0;
-  int16_t left = 1500;
-  int16_t right = 1500;
+  int16_t left = kMotorStop;
+  int16_t right = kMotorStop;
   int16_t axes[6] = {0, 0, 0, 0, 0, 0};  // lx, ly, rx, ry, lt, rt scaled to int16
   uint16_t flagBits = 0;
 

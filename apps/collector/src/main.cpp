@@ -33,6 +33,7 @@
 #include <opencv2/imgproc.hpp>
 
 #include "camera/frame_source.h"
+#include "common/config.h"
 #include "common/proto.h"
 #include "dataset_writer.h"
 #include "esp32_driver/esp32_driver.h"
@@ -156,7 +157,7 @@ int main(int argc, char** argv) {
           state.linkLost.store(false);
           preview.setStation(src.sin_addr);
           if (driver) {
-            if (c.estop()) driver->setMotors(1500, 1500);
+            if (c.estop()) driver->setMotors(kMotorStop, kMotorStop);
             else driver->setMotors(c.left, c.right);
           }
         }
@@ -165,9 +166,9 @@ int main(int argc, char** argv) {
       if (now - state.lastRxMonoNs.load() > kLinkTimeoutNs) {
         if (!state.linkLost.exchange(true)) std::cerr << "control link lost -> failsafe\n";
         lastSeq = 0;  // a (re)started station begins a new seq run
-        state.left.store(1500);
-        state.right.store(1500);
-        if (driver) driver->setMotors(1500, 1500);
+        state.left.store(kMotorStop);
+        state.right.store(kMotorStop);
+        if (driver) driver->setMotors(kMotorStop, kMotorStop);
       }
     }
   });

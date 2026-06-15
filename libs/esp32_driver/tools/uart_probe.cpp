@@ -2,7 +2,7 @@
 //
 //   uart_probe [port] [baud]
 //
-// Type a command (e.g. "MOTOR 1600 1400", "GET bno", "healthcheck"); it is sent
+// Type a command (e.g. "MOTOR 2000 -2000", "GET bno", "healthcheck"); it is sent
 // as "<id> <command>" and the matching reply is printed. Ctrl-D to quit.
 #include <iostream>
 #include <string>
@@ -26,7 +26,7 @@ int main(int argc, char** argv) {
     return 1;
   }
   std::cerr << "connected to " << port << " @ " << baud << " baud\n"
-            << "examples: MOTOR 1600 1400 | GET bno | GET usonic | GET button | healthcheck\n";
+            << "examples: MOTOR 2000 -2000 | GET bno | GET usonic | GET button | healthcheck\n";
 
   long long id = 1;
   std::string line;

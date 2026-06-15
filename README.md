@@ -60,8 +60,9 @@ Run anything Torch-linked with `LD_LIBRARY_PATH=../yolo_cpp/libtorch/lib`.
 ## Workflow
 
 1. **Train** (PC): `trainer --data ../linetrace_data --out models --epochs 40`
-   - Trains `LineNet` on the labels.csv sessions; reports val MAE in PWM units;
-     writes `models/linetrace_model.pt` + `model_info.json`.
+   - Trains `LineNet` on the labels.csv sessions; reports val MAE in motor-command
+     units (range -8000..8000, neutral 0); writes `models/linetrace_model.pt` +
+     `model_info.json`.
    - `--sensors` adds IMU/ultrasonic fusion; `--grayscale`, `--target-space ts`,
      `--limit N` (subset) also available.
    - Verify load+infer: `model_probe models/linetrace_model.pt <frame.jpg>`.

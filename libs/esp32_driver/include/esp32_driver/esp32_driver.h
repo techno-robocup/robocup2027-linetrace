@@ -37,7 +37,7 @@ class Esp32Driver {
   bool connected() const { return connected_.load(); }
 
   // --- control-loop-safe (non-blocking) ---
-  void setMotors(int left, int right);  // clamped to [1000,2000]
+  void setMotors(int left, int right);  // clamped to [-8000,8000]
   void rescue(int pos, int wire);        // queued (latest wins)
 
   // --- cached reads (instant) ---
@@ -58,8 +58,8 @@ class Esp32Driver {
   std::atomic<bool> connected_{false};
   long long nextId_ = 1;
 
-  std::atomic<int> left_{1500};
-  std::atomic<int> right_{1500};
+  std::atomic<int> left_{0};
+  std::atomic<int> right_{0};
 
   std::mutex cmdMx_;
   std::optional<std::pair<int, int>> pendingRescue_;

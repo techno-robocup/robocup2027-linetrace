@@ -25,9 +25,9 @@ static int g_failures = 0;
 int main() {
   using namespace rc;
 
-  // --- label codec round-trips for the real recorded motor combos ---
-  const MotorCmd combos[] = {{1500, 1500}, {1680, 1680}, {1600, 1400},
-                             {1400, 1600}, {1780, 1580}, {1000, 2000}};
+  // --- label codec round-trips for representative motor combos ---
+  const MotorCmd combos[] = {{0, 0},       {3000, 3000}, {2000, -2000},
+                             {-2000, 2000}, {5000, 1000}, {-8000, 8000}};
   for (const auto& c : combos) {
     MotorCmd lr = decodeLR(encodeLR(c));
     EXPECT(lr.left == c.left && lr.right == c.right, "LR round-trip");
@@ -38,7 +38,7 @@ int main() {
   }
 
   // normalized outputs are in [0,1]
-  auto n = encodeLR({1680, 1400});
+  auto n = encodeLR({3000, -2000});
   EXPECT(n[0] >= 0.0f && n[0] <= 1.0f && n[1] >= 0.0f && n[1] <= 1.0f, "norm range");
 
   // --- mixing sanity ---
@@ -76,8 +76,8 @@ int main() {
     ControlPacket c;
     c.seq = 0xDEADBEEF;
     c.tsMs = 0x0102030405060708ull;
-    c.left = 1750;
-    c.right = 1420;
+    c.left = 5000;
+    c.right = -3000;
     c.axes[0] = -12345;
     c.axes[5] = 32000;
     c.flagBits = flags::kRecording | flags::kHeartbeat;
@@ -85,7 +85,7 @@ int main() {
     EXPECT(encodeControl(c, buf) == kControlPacketSize, "encodeControl size");
     ControlPacket d;
     EXPECT(decodeControl(buf, sizeof(buf), d), "decodeControl ok");
-    EXPECT(d.seq == c.seq && d.tsMs == c.tsMs && d.left == 1750 && d.right == 1420 &&
+    EXPECT(d.seq == c.seq && d.tsMs == c.tsMs && d.left == 5000 && d.right == -3000 &&
                d.axes[0] == -12345 && d.axes[5] == 32000 && d.recording() && !d.estop(),
            "control round-trip");
     buf[10] ^= 0xFF;  // corrupt a byte

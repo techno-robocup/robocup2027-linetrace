@@ -13,6 +13,7 @@
 
 #include <opencv2/core.hpp>
 
+#include "common/config.h"
 #include "esp32_driver/protocol.h"
 
 namespace rc {
@@ -20,8 +21,8 @@ namespace rc {
 struct FrameJob {
   cv::Mat image;  // BGR, already oriented
   uint64_t unixMs = 0;
-  int left = 1500;
-  int right = 1500;
+  int left = kMotorStop;
+  int right = kMotorStop;
   esp32::Bno bno;
   esp32::Ultrasonic uson;
   bool button = false;

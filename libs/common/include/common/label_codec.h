@@ -1,5 +1,5 @@
-// Invertible conversions between motor commands (PWM microseconds) and the
-// normalized [0,1] targets a sigmoid-headed network emits.
+// Invertible conversions between motor commands (signed speed, -8000..8000) and
+// the normalized [0,1] targets a sigmoid-headed network emits.
 //
 // Two target spaces are supported:
 //   * LR            : the two outputs are (left, right) directly.
@@ -30,13 +30,13 @@ inline int clampMotor(int v) { return std::max(kMotorMin, std::min(kMotorMax, v)
 
 inline float clamp01(float v) { return std::max(0.0f, std::min(1.0f, v)); }
 
-// PWM (1000..2000) -> normalized [0,1].
+// motor command (-8000..8000) -> normalized [0,1].
 inline float pwmToNorm(int pwm) {
   return clamp01(static_cast<float>(clampMotor(pwm) - kMotorMin) /
                  static_cast<float>(kMotorMax - kMotorMin));
 }
 
-// normalized [0,1] -> PWM (1000..2000).
+// normalized [0,1] -> motor command (-8000..8000).
 inline int normToPwm(float n) {
   return clampMotor(static_cast<int>(std::lround(
       kMotorMin + clamp01(n) * static_cast<float>(kMotorMax - kMotorMin))));

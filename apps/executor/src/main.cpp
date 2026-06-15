@@ -257,7 +257,7 @@ int main(int argc, char** argv) {
       MotorCmd cmd = decode({y[0][0].item<float>(), y[0][1].item<float>()}, args.space);
 
       const bool killed = driver && !driver->button();
-      if (killed) cmd = {1500, 1500};
+      if (killed) cmd = {kMotorStop, kMotorStop};
       if (driver) driver->setMotors(cmd.left, cmd.right);
       const uint64_t n = infers.fetch_add(1);
       if (args.print && n % 15 == 0)

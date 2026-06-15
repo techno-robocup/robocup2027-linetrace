@@ -34,10 +34,10 @@ def main():
     t0 = time.time()
     seq = 0
     while time.time() - t0 < secs:
-        # sweep a gentle turn so left/right vary
+        # sweep a gentle turn so left/right vary (range -8000..8000, neutral 0)
         phase = (time.time() - t0)
-        left = 1600 + int(80 * (phase % 1))
-        right = 1600 - int(80 * (phase % 1))
+        left = 2000 + int(800 * (phase % 1))
+        right = 2000 - int(800 * (phase % 1))
         sock.sendto(packet(seq, left, right, FLAG_RECORDING), (host, port))
         seq += 1
         time.sleep(0.02)  # 50 Hz

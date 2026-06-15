@@ -8,7 +8,8 @@
 namespace rc::esp32 {
 
 namespace {
-int clampMotor(int v) { return std::max(1000, std::min(2000, v)); }
+// Signed speed range, neutral 0 (kept in sync with common/config.h kMotorMin/Max).
+int clampMotor(int v) { return std::max(-8000, std::min(8000, v)); }
 }  // namespace
 
 Esp32Driver::Esp32Driver(Config cfg) : cfg_(std::move(cfg)) {}
@@ -164,7 +165,7 @@ void Esp32Driver::ioLoop() {
   }
 
   // On shutdown, best-effort neutral.
-  if (port_.isOpen()) transact("MOTOR 1500 1500");
+  if (port_.isOpen()) transact("MOTOR 0 0");
   port_.close();
   connected_.store(false);
 }

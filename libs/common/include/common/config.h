@@ -8,14 +8,15 @@
 
 namespace rc {
 
-// --- Motor command range (matches the ESP32 firmware / 2026 program) ---
-// Each wheel command is a servo-style pulse width in microseconds.
-//   1500 = stop, 2000 = full forward, 1000 = full reverse (natural convention;
-//   the ESP32 firmware applies its own right-wheel inversion internally).
-inline constexpr int kMotorMin = 1000;
-inline constexpr int kMotorMax = 2000;
-inline constexpr int kMotorStop = 1500;
-inline constexpr int kMotorSpan = (kMotorMax - kMotorMin) / 2;  // 500 either side of stop
+// --- Motor command range ---
+// Each wheel command is a signed speed value (the ESP32 firmware must use the
+// same convention).
+//   0 = stop, +8000 = full forward, -8000 = full reverse (the firmware applies
+//   its own right-wheel inversion internally).
+inline constexpr int kMotorMin = -8000;
+inline constexpr int kMotorMax = 8000;
+inline constexpr int kMotorStop = 0;
+inline constexpr int kMotorSpan = (kMotorMax - kMotorMin) / 2;  // 8000 either side of stop
 
 // --- Model input geometry (matches the 2026 prototype's model_info.json) ---
 inline constexpr int kModelW = 160;

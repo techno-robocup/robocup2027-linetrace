@@ -3,7 +3,7 @@
 //   trainer --data <dataset_root> [options]
 //
 // Reads the labels.csv sessions, trains LineNet (image -> 2 normalized motor
-// outputs), reports validation MAE in PWM units, and saves the trained weights
+// outputs), reports validation MAE in motor-command units, and saves the weights
 // (torch::save) plus a model_info.json the executor reads back.
 #include <algorithm>
 #include <chrono>
@@ -102,7 +102,7 @@ void splitBySession(const std::vector<Sample>& all, double valFrac,
   }
 }
 
-void writeModelInfo(const Args& a, int sensorDim, double valLoss, double valMaePwm,
+void writeModelInfo(const Args& a, int sensorDim, double valLoss, double valMaeUnits,
                     int epochsRun) {
   std::ofstream f(a.out + "/model_info.json");
   f << "{\n"
@@ -125,7 +125,7 @@ void writeModelInfo(const Args& a, int sensorDim, double valLoss, double valMaeP
     << "  \"preprocess_rotate180\": false,\n"
     << "  \"frames_pre_rotated_by_source\": true,\n"
     << "  \"final_val_loss\": " << valLoss << ",\n"
-    << "  \"final_val_mae_pwm\": " << valMaePwm << ",\n"
+    << "  \"final_val_mae\": " << valMaeUnits << ",\n"
     << "  \"epochs_trained\": " << epochsRun << "\n"
     << "}\n";
 }
@@ -227,7 +227,7 @@ int main(int argc, char** argv) {
 
   double bestVal = 1e30;
   int sinceImprove = 0, sinceLR = 0, epochsRun = 0;
-  double bestMaePwm = 0.0;
+  double bestMaeUnits = 0.0;
   double curLr = a.lr;
 
   for (int epoch = 1; epoch <= a.epochs; ++epoch) {
@@ -282,23 +282,23 @@ int main(int argc, char** argv) {
     trLoss /= std::max<int64_t>(1, trN);
     vLoss /= std::max<int64_t>(1, vN);
     const double vMaeNorm = vMae / std::max<int64_t>(1, vN);
-    const double vMaePwm = vMaeNorm * (kMotorMax - kMotorMin);
+    const double vMaeUnits = vMaeNorm * (kMotorMax - kMotorMin);
     epochsRun = epoch;
 
     auto t1 = std::chrono::steady_clock::now();
     double secs = std::chrono::duration<double>(t1 - t0).count();
     std::cout << "epoch " << epoch << "/" << a.epochs << "  train " << trLoss << "  val "
-              << vLoss << "  valMAE " << vMaeNorm << " (" << vMaePwm << " pwm)  lr " << curLr
+              << vLoss << "  valMAE " << vMaeNorm << " (" << vMaeUnits << " units)  lr " << curLr
               << "  " << secs << "s\n";
 
     // ---- best / early-stop / plateau LR ----
     if (vLoss < bestVal - 1e-6) {
       bestVal = vLoss;
-      bestMaePwm = vMaePwm;
+      bestMaeUnits = vMaeUnits;
       sinceImprove = 0;
       sinceLR = 0;
       torch::save(net, a.out + "/linetrace_model.pt");
-      writeModelInfo(a, sensorDim, bestVal, bestMaePwm, epochsRun);
+      writeModelInfo(a, sensorDim, bestVal, bestMaeUnits, epochsRun);
     } else {
       ++sinceImprove;
       ++sinceLR;
@@ -316,7 +316,7 @@ int main(int argc, char** argv) {
     }
   }
 
-  std::cout << "best val loss " << bestVal << "  (MAE " << bestMaePwm
-            << " pwm)\nsaved to " << a.out << "/linetrace_model.pt\n";
+  std::cout << "best val loss " << bestVal << "  (MAE " << bestMaeUnits
+            << " units)\nsaved to " << a.out << "/linetrace_model.pt\n";
   return 0;
 }
