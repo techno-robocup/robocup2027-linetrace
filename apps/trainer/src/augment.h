@@ -13,6 +13,12 @@ namespace rc {
 // Random brightness scaling in [0.6, 1.4] (matches the 2026 prototype).
 void augmentBrightness(cv::Mat& bgr);
 
+// Additive zero-mean Gaussian pixel noise, stddev drawn per call in [0, 12]
+// (8-bit scale), applied independently per channel. Models camera sensor noise
+// so the model doesn't overfit to the clean recorded frames. Saturates to
+// [0,255]; a near-zero stddev is a no-op, so some frames pass through untouched.
+void augmentNoise(cv::Mat& bgr);
+
 // With probability 0.5, horizontally flip the frame and swap the motor command
 // (left<->right). Swapping the command is correct for both target spaces:
 // in ThrottleSteer it negates steer while preserving throttle.
@@ -24,5 +30,9 @@ void maybeFlip(cv::Mat& bgr, MotorCmd& cmd);
 // last-frame label the clip predicts.
 void augmentClipBrightness(std::vector<cv::Mat>& frames);
 void maybeFlipClip(std::vector<cv::Mat>& frames, MotorCmd& cmd);
+
+// Per-frame independent noise for clips: unlike brightness/flip, sensor noise is
+// genuinely uncorrelated frame-to-frame, so each frame gets its own draw.
+void augmentClipNoise(std::vector<cv::Mat>& frames);
 
 }  // namespace rc

@@ -165,6 +165,7 @@ torch::data::Example<> LineDataset::get(size_t index) {
     if (cfg_.augment) {
       augmentClipBrightness(frames);
       maybeFlipClip(frames, cmd);
+      augmentClipNoise(frames);  // after brightness so noise isn't scaled by it
     }
 
     std::vector<torch::Tensor> ts;
@@ -183,6 +184,7 @@ torch::data::Example<> LineDataset::get(size_t index) {
   if (cfg_.augment) {
     augmentBrightness(img);
     maybeFlip(img, cmd);
+    augmentNoise(img);  // after brightness so noise isn't scaled by it
   }
 
   torch::Tensor data = preprocess(img, cfg_.preproc, /*addBatch=*/false);
