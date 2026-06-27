@@ -22,7 +22,7 @@ option(BUILD_TRANSFER_CLIENT "Transfer client library + CLI"                    
 option(BUILD_TESTS           "Unit / smoke tests"                               ON)
 
 # Path to the libtorch tree (vendored alongside in yolo_cpp by default).
-set(LIBTORCH_DIR "${CMAKE_SOURCE_DIR}/../yolo_cpp/libtorch"
+set(LIBTORCH_DIR "${CMAKE_SOURCE_DIR}/libtorch"
     CACHE PATH "Path to the libtorch distribution")
 
 # Anything that uses the model / preprocessing needs Torch + OpenCV.
