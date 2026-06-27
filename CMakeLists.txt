@@ -34,6 +34,25 @@ endif()
 if(_need_torch)
   list(APPEND CMAKE_PREFIX_PATH "${LIBTORCH_DIR}")
   set(Torch_DIR "${LIBTORCH_DIR}/share/cmake/Torch")
+
+  # A CUDA LibTorch ships its own matching CUDA runtime in libtorch/lib, but
+  # find_package(Torch) -> FindCUDAToolkit prefers a system CUDA toolkit if one is
+  # installed. When the system toolkit is older than the bundle (e.g. system 12.0 vs a
+  # cu128 LibTorch), linking libtorch_cuda fails on missing cudart symbols. Pre-seed
+  # CUDA_cudart_LIBRARY with the bundled cudart so the CUDA::cudart target uses it.
+  # Self-gating: a CPU LibTorch has no such file, so the glob is empty and this is a
+  # no-op. The bundled filename carries a download-specific hash, hence the glob.
+  # Skipped if the user passes -DCUDA_cudart_LIBRARY=... explicitly.
+  if(NOT CUDA_cudart_LIBRARY)
+    file(GLOB _bundled_cudart "${LIBTORCH_DIR}/lib/libcudart-*.so.*")
+    if(_bundled_cudart)
+      list(GET _bundled_cudart 0 _bundled_cudart)
+      set(CUDA_cudart_LIBRARY "${_bundled_cudart}"
+          CACHE FILEPATH "cudart from bundled LibTorch (CUDA version-skew workaround)")
+      message(STATUS "CUDA cudart (bundled): ${_bundled_cudart}")
+    endif()
+  endif()
+
   find_package(Torch REQUIRED)
   find_package(OpenCV REQUIRED)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
