@@ -33,6 +33,14 @@ and run it on the robot to follow the line autonomously.
 
 🔧 = needs on-device build/verification (real libcamera, ESP32, SDL2 gamepad, GUI preview).
 
+## Libtorch installation
+```bash
+curl -L -o libtorch-cu128.zip \
+  "https://download.pytorch.org/libtorch/cu128/libtorch-cxx11-abi-shared-with-deps-2.7.1%2Bcu128.zip"
+unzip -q libtorch-cu128.zip      # -> ./libtorch
+rm libtorch-cu128.zip
+```
+
 ## Build
 
 LibTorch is taken from the vendored `../yolo_cpp/libtorch` (2.11.0+cpu) by
