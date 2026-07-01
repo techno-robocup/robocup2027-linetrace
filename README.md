@@ -37,7 +37,7 @@ and run it on the robot to follow the line autonomously.
 ```bash
 curl -L -o libtorch-cu128.zip \
   "https://download.pytorch.org/libtorch/cu128/libtorch-cxx11-abi-shared-with-deps-2.7.1%2Bcu128.zip"
-unzip -q libtorch-cu128.zip      # -> ./libtorch
+unzip -q libtorch-cu128.zip
 rm libtorch-cu128.zip
 ```
 
